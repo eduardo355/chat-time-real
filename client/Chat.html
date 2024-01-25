@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Time Real</title>
+
+    <script type="module" >
+        const getUrlParams = (name) =>{
+            const UrlParams = new URLSearchParams(window.location.search)
+            return UrlParams.get(name)
+        }
+        //const userId = getUrlParams('id');
+        const userName = getUrlParams('name');
+        //const userApellido = getUrlParams('apellido');
+        //const userUser = getUrlParams('user');
+
+        import { io } from 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.esm.min.js'
+        let serverOffset = 0
+        const socket = io({
+            auth: {
+                name: userName,
+                serverOffset: 0
+            }
+        })
+
+        const form = document.getElementById('form')
+        const input = document.getElementById('input')
+        const message = document.getElementById('message')
+
+
+        socket.on('chat mensaje', (msg, id, fecha, name) => {
+            const newMessageSound = document.getElementById('newMessageSound');
+            newMessageSound.play();
+            let ParseFecha = new Date(fecha)
+            let hora = ParseFecha.getHours()
+            let min = ParseFecha.getMinutes()
+            const item = `
+            <li> 
+                <span class="userName"> ${name} </span>
+                ${msg}
+                <small> ${hora}:${min} ${hora > 12 ? 'PM' : 'AM'} </small>
+            </li>`
+            message.insertAdjacentHTML('beforeend', item)
+            socket.auth.serverOffset = serverOffset
+            message.scrollTop = message.scrollHeight
+        })
+
+        //enviar mensajer
+        form.addEventListener('submit',(e) => {
+            e.preventDefault()
+            
+            if(input.value) {
+                let fechaActual = new Date()
+                socket.emit('chat mensaje', input.value, fechaActual)
+                input.value = ''
+            }
+        })
+    </script>
+</head>
+
+    <style>
+        *{
+            padding: 0%;
+            margin: 0%;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            padding: 1rem;
+            grid-template-rows: 1fr;
+        }
+        
+        .container {
+            border-radius: 10px;
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            background: rgb(242, 241, 241);
+            
+        }
+
+        .tittle {
+            background: #09f;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+            -webkit-box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+            -moz-box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+        }
+
+        span {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        #form {
+            bottom: 0;
+            display: flex;
+            height: 50px;
+            left: 0;
+            padding: 4px;
+            position: absolute;
+            right: 0%;
+            background: #09f;
+        }
+
+        .input{
+            border-radius: 10px;
+            border: 1px solid #fff;
+            flex: 1;
+            margin: 4px;
+            padding: 3px 10px;
+            font-size: 18px;
+            box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+            -webkit-box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+            -moz-box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+        }
+ 
+        .input:focus {
+            outline: none;
+        }
+
+        button {
+            background: rgb(1, 192, 1);
+            color: #fff;
+            border: 0;
+            margin: 4px;
+            border-radius: 4px;
+            padding: .6rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #0cf;
+        }
+        
+        #message {
+            position: absolute;
+            color: black;
+            list-style-type: none;
+            padding: .5rem;
+        }
+
+        #message > li {
+            display: flex;
+            flex-direction: column;
+            padding: .5rem 1rem;
+            background: #fff;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+            -webkit-box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+            -moz-box-shadow: 0px 2px 5px -3px rgba(0,0,0,0.75);
+            font-size: 18px;
+        }
+
+        small {
+            color: gray;
+            font-size: 13px;
+        }
+        .scroll {
+            overflow-y: scroll;
+            height: 86%;
+            scroll-behavior: smooth;
+            width: 100%;
+        }
+
+        .userName{
+            color: #09f;
+            margin-bottom: .4rem;
+        }
+    </style>
+<body>
+    <section class="container">
+        <div class="tittle">
+            <span>Grupo de chat</span>
+        </div>
+        
+        <ul id="message" class="scroll"></ul>
+        <audio id="newMessageSound" src="./sound/noti.mp3"></audio>
+        <form id="form">
+            <input type="text" class="input" name="message" id="input" placeholder="Type of message" autocomplete="off">
+            <button type="submit">Enviar</button>
+        </form>
+    </section>
+</body>
+</html> 
