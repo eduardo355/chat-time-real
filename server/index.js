@@ -44,13 +44,18 @@ await db.execute(`
         user TEXT
     )
 `) 
-
+let conecctionUser = 0
 io.on('connection', async (socket) => {
-    console.log('Usuario Conectado')
+    console.log('Usuario Conectado');
+    conecctionUser += 1; 
+    let name = socket.handshake.auth.name
+    io.emit('UserConnection', conecctionUser.toString(), name)
 
     socket.on('disconnect', () => {
-        console.log('usuario desconectado');
-    })
+        conecctionUser -= 1;
+        io.emit('UserConnection', conecctionUser.toString());
+        console.log('Usuario desconectado');
+    });
 
     socket.on('Registro', async (name, apellido , user) =>{
         let result 
@@ -90,14 +95,14 @@ io.on('connection', async (socket) => {
             
             result = await db.execute({
                 sql: 'INSERT INTO messages (content, fecha, userName) VALUES (:message, :fecha, :userName)',
-                args: { message: msg, fecha: fechaActual, userName: socket.handshake.auth.name }
+                args: { message: msg, fecha: fechaActual, userName: socket.handshake.auth.name}
             })
         } catch (error) {  
             console.error(error) 
             return
         }
         let name = socket.handshake.auth.name.toString()
-        io.emit('chat mensaje', msg, result.lastInsertRowid.toString(), fechaActual, name )
+        io.emit('chat mensaje', msg, result.lastInsertRowid.toString(), fechaActual, name)
     }) 
  
     if(!socket.recovered) {
@@ -106,7 +111,6 @@ io.on('connection', async (socket) => {
                 sql: 'SELECT id, content, fecha, userName FROM messages WHERE id > ?',
                 args: [socket.handshake.auth.serverOffset ?? 0]
             })
-             
             result.rows.forEach(row => {
                 socket.emit('chat mensaje', row.content, row.id.toString(), row.fecha.toString(), row.userName)
             })

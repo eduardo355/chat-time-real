@@ -1,7 +1,0 @@
-{
-    "builds": [{ "src": "./server", "use": "@vercel/node" }],
-    "routes": [{ "src": "/.*", "dest": "./server/index.js" }],
-    "env": {
-        "DB_TOKEN": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOiIyMDI0LTAxLTI0VDA1OjM0OjU3Ljk5MTEyMDE2OFoiLCJpZCI6ImYyODc5MDYwLWJhNzgtMTFlZS04ZGQ5LWNlZjM1NjAwNTAyNiJ9.HrmMEVcKpGMekFqMX5SgfkNunPVgBs_EEspvSYgbG3viJUcGiegqs40PykwgU_Kw00KTv-uwhc6dpyhh8f1WDA"
-    }
-} 
